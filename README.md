@@ -1,6 +1,6 @@
 # Host Manager（主机管理系统）
 
-- 技术栈：Python 3.11 + Django 5.0 + Django REST Framework + MySQL 8 + Redis 7 + Celery 5
+- 技术栈：Python 3.11.9 + Django 5.0 + Django REST Framework + MySQL 8.0 + Redis 3.x(Windows)/7.x(Linux) + Celery 5
 
 > 📸 **项目运行截图**：
 
@@ -417,9 +417,12 @@ Swagger 文档（需启动服务）：
 ## 八、环境要求与安装
 
 ### 环境要求
-- Python 3.11
-- MySQL 8.x
-- Redis 7.x（用于 Celery 定时任务）
+- Python 3.11（当前开发环境为 3.11.9）
+- MySQL 8.x（当前环境 8.0.46）
+- Redis（用于 Celery 定时任务）：
+  - Windows 本地环境：Redis 3.x（如 3.0.504）
+  - Linux 生产环境：Redis 7.x
+  - 本项目仅使用 Redis 的 list / pub-sub / string 基础能力（作为 Celery Broker/Backend），上述版本均兼容
 
 ### 安装步骤
 
