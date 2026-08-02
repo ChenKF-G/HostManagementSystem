@@ -12,14 +12,13 @@ import os
 
 from cryptography.fernet import Fernet, InvalidToken
 
-# 从环境变量读取密钥，首次启动需生成并妥善保管
-_KEY = os.environ.get("ENCRYPT_KEY")
-
 
 def _get_fernet() -> Fernet:
-    if not _KEY:
+    # 每次调用时动态读取环境变量，避免模块导入时固定、后期变更失效
+    key = os.environ.get("ENCRYPT_KEY")
+    if not key:
         raise RuntimeError("环境变量 ENCRYPT_KEY 未配置，无法进行加解密")
-    return Fernet(_KEY.encode())
+    return Fernet(key.encode())
 
 
 def generate_key() -> str:

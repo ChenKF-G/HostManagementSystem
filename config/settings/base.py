@@ -207,7 +207,14 @@ CELERY_BEAT_SCHEDULE = {
 # ============================================================
 # 加密密钥（Fernet）
 # ============================================================
-ENCRYPT_KEY = os.environ.get("ENCRYPT_KEY", "m2e08--CH4UP_gwXLZNZY4XVRvM3a8vP8JmL_wTqQyY=")
+ENCRYPT_KEY = os.environ.get("ENCRYPT_KEY", "")
+
+# 生产环境强制要求配置敏感密钥，缺失时直接报错，避免带着空密钥启动
+if not ENCRYPT_KEY and not DEBUG:
+    raise RuntimeError(
+        "生产环境必须通过环境变量 ENCRYPT_KEY 配置 Fernet 密钥，"
+        "请用 `python -c \"from utils.encrypt import generate_key; print(generate_key())\"` 生成后填入 .env"
+    )
 
 # ============================================================
 # 日志配置（LOGGING）

@@ -134,6 +134,11 @@
       <input id="pingId" placeholder="主机id">
       <button class="success" onclick="hostPing()">探测</button>
     </div>
+    <div class="form-row">
+      <input id="pingIds" placeholder="批量id，逗号分隔，如 1,2,3">
+      <button class="success" onclick="hostPingBatch()">批量探测</button>
+      <button onclick="hostPingBatchAll()">探测全部</button>
+    </div>
     <div id="pingResult" class="result"></div>
   </div>
 
@@ -342,6 +347,28 @@ async function hostPing() {
     return;
   }
   const r = await api("POST", `${BASE}/hosts/${id}/ping/`);
+  show("pingResult", r);
+}
+
+// 批量探测：按指定 id 列表
+async function hostPingBatch() {
+  const raw = document.getElementById("pingIds").value.trim();
+  if (!raw) {
+    show("pingResult", { code: 400, message: "请填写批量主机id（逗号分隔）", data: null });
+    return;
+  }
+  const ids = raw.split(",").map((s) => s.trim()).filter((s) => s !== "").map(Number);
+  if (!ids.length) {
+    show("pingResult", { code: 400, message: "请填写有效的批量主机id", data: null });
+    return;
+  }
+  const r = await api("POST", `${BASE}/hosts/ping_batch/`, { ids });
+  show("pingResult", r);
+}
+
+// 批量探测：不传 ids 则探测全部主机
+async function hostPingBatchAll() {
+  const r = await api("POST", `${BASE}/hosts/ping_batch/`, {});
   show("pingResult", r);
 }
 

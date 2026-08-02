@@ -29,7 +29,7 @@ class PingService:
                 cmd, capture_output=True, timeout=5, text=True
             )
             online = result.returncode == 0
-        except (subprocess.TimeoutExpired, subprocess.SubprocessError, Exception):  # noqa: BLE001
+        except Exception:  # noqa: BLE001  超时/子进程异常/其他异常均视为离线
             online = False
 
         host.status = ONLINE if online else OFFLINE

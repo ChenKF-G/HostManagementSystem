@@ -97,6 +97,30 @@ class HostViewSet(viewsets.ModelViewSet):
             )
         )
 
+    @decorators.action(detail=False, methods=["post"])
+    def ping_batch(self, request):
+        """
+        批量探测主机可达性。
+        请求体：{"ids": [1, 2, 3]} 或 {"hostnames": ["a", "b"]}，未指定则探测全部。
+        """
+        ids = request.data.get("ids") or []
+        hostnames = request.data.get("hostnames") or []
+        hosts = Host.objects.all()
+        if ids:
+            hosts = hosts.filter(id__in=ids)
+        elif hostnames:
+            hosts = hosts.filter(hostname__in=hostnames)
+        hosts = list(hosts)
+        if not hosts:
+            return response.Response(
+                Result.success(data=[], message="没有匹配的主机"),
+                status=status.HTTP_200_OK,
+            )
+        results = PingService.ping_batch(hosts)
+        return response.Response(
+            Result.success(data=results, message=f"批量探测完成，共 {len(results)} 台主机")
+        )
+
     @decorators.action(detail=True, methods=["get"])
     def passwords(self, request, id=None):
         """查看指定主机密码历史（脱敏展示）"""
