@@ -5,7 +5,7 @@ Ping 探测业务（services/ping_service.py）
 """
 import logging
 import subprocess
-
+import platform
 from constants.status import OFFLINE, ONLINE
 
 logger = logging.getLogger("app")
@@ -18,9 +18,6 @@ class PingService:
         探测单台主机是否 ping 可达，并更新状态。
         返回 True 表示在线，False 表示离线。
         """
-        # 跨平台：Windows 用 -n，Linux/Mac 用 -c
-        import platform
-
         system = platform.system().lower()
         if system == "windows":
             cmd = ["ping", "-n", "1", "-w", "3000", host.ip]
