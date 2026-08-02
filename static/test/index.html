@@ -175,10 +175,16 @@
 const BASE = "/api";
 
 // ---------- 通用请求封装 ----------
+// 登录/刷新接口无需携带 token，避免残留的过期 token 导致认证拦截（返回401）
+const NO_AUTH_URLS = ["/api/auth/login", "/api/auth/refresh"];
+
 async function api(method, url, body = null) {
-  const token = localStorage.getItem("access_token");
   const headers = { "Content-Type": "application/json" };
-  if (token) headers.Authorization = `Bearer ${token}`;
+  const isNoAuth = NO_AUTH_URLS.some((p) => url.includes(p));
+  if (!isNoAuth) {
+    const token = localStorage.getItem("access_token");
+    if (token) headers.Authorization = `Bearer ${token}`;
+  }
   const res = await fetch(url, { method, headers, body: body ? JSON.stringify(body) : null });
   const data = await res.json();
   return { status: res.status, data };
@@ -201,6 +207,9 @@ async function login() {
   if (r.data && r.data.data && r.data.data.access) {
     localStorage.setItem("access_token", r.data.data.access);
     document.getElementById("currentUser").textContent = r.data.data.user?.username || "已登录";
+  } else {
+    // 登录失败：清除可能已失效的旧 token，避免后续请求持续被拦截
+    localStorage.removeItem("access_token");
   }
   show("loginResult", r);
 }
@@ -226,12 +235,14 @@ async function cityCreate() {
   show("cityResult", r);
 }
 async function cityDetail() {
-  const id = document.getElementById("cityId").value;
+  const id = document.getElementById("cityId").value.trim();
+  if (!id) { show("cityResult", { code: 400, message: "请填写城市id", data: null }); return; }
   const r = await api("GET", `${BASE}/cities/${id}/`);
   show("cityResult", r);
 }
 async function cityUpdate() {
-  const id = document.getElementById("cityId").value;
+  const id = document.getElementById("cityId").value.trim();
+  if (!id) { show("cityResult", { code: 400, message: "请填写城市id", data: null }); return; }
   const r = await api("PUT", `${BASE}/cities/${id}/`, {
     name: document.getElementById("cityName").value,
     code: document.getElementById("cityCode").value,
@@ -240,7 +251,8 @@ async function cityUpdate() {
   show("cityResult", r);
 }
 async function cityDelete() {
-  const id = document.getElementById("cityId").value;
+  const id = document.getElementById("cityId").value.trim();
+  if (!id) { show("cityResult", { code: 400, message: "请填写城市id", data: null }); return; }
   const r = await api("DELETE", `${BASE}/cities/${id}/`);
   show("cityResult", r);
 }
@@ -260,12 +272,14 @@ async function idcCreate() {
   show("idcResult", r);
 }
 async function idcDetail() {
-  const id = document.getElementById("idcId").value;
+  const id = document.getElementById("idcId").value.trim();
+  if (!id) { show("idcResult", { code: 400, message: "请填写机房id", data: null }); return; }
   const r = await api("GET", `${BASE}/idcs/${id}/`);
   show("idcResult", r);
 }
 async function idcUpdate() {
-  const id = document.getElementById("idcId").value;
+  const id = document.getElementById("idcId").value.trim();
+  if (!id) { show("idcResult", { code: 400, message: "请填写机房id", data: null }); return; }
   const r = await api("PUT", `${BASE}/idcs/${id}/`, {
     city: document.getElementById("idcCity").value,
     name: document.getElementById("idcName").value,
@@ -275,7 +289,8 @@ async function idcUpdate() {
   show("idcResult", r);
 }
 async function idcDelete() {
-  const id = document.getElementById("idcId").value;
+  const id = document.getElementById("idcId").value.trim();
+  if (!id) { show("idcResult", { code: 400, message: "请填写机房id", data: null }); return; }
   const r = await api("DELETE", `${BASE}/idcs/${id}/`);
   show("idcResult", r);
 }
@@ -297,12 +312,14 @@ async function hostCreate() {
   show("hostResult", r);
 }
 async function hostDetail() {
-  const id = document.getElementById("hostId").value;
+  const id = document.getElementById("hostId").value.trim();
+  if (!id) { show("hostResult", { code: 400, message: "请填写主机id", data: null }); return; }
   const r = await api("GET", `${BASE}/hosts/${id}/`);
   show("hostResult", r);
 }
 async function hostUpdate() {
-  const id = document.getElementById("hostId").value;
+  const id = document.getElementById("hostId").value.trim();
+  if (!id) { show("hostResult", { code: 400, message: "请填写主机id", data: null }); return; }
   const r = await api("PUT", `${BASE}/hosts/${id}/`, {
     hostname: document.getElementById("hostHostname").value,
     idc: document.getElementById("hostIdc").value,
@@ -311,21 +328,30 @@ async function hostUpdate() {
   show("hostResult", r);
 }
 async function hostDelete() {
-  const id = document.getElementById("hostId").value;
+  const id = document.getElementById("hostId").value.trim();
+  if (!id) { show("hostResult", { code: 400, message: "请填写主机id", data: null }); return; }
   const r = await api("DELETE", `${BASE}/hosts/${id}/`);
   show("hostResult", r);
 }
 
 // ---------- Ping ----------
 async function hostPing() {
-  const id = document.getElementById("pingId").value;
+  const id = document.getElementById("pingId").value.trim();
+  if (!id) {
+    show("pingResult", { code: 400, message: "请填写主机id", data: null });
+    return;
+  }
   const r = await api("POST", `${BASE}/hosts/${id}/ping/`);
   show("pingResult", r);
 }
 
 // ---------- 密码历史 ----------
 async function hostPasswords() {
-  const id = document.getElementById("pwdId").value;
+  const id = document.getElementById("pwdId").value.trim();
+  if (!id) {
+    show("pwdResult", { code: 400, message: "请填写主机id", data: null });
+    return;
+  }
   const r = await api("GET", `${BASE}/hosts/${id}/passwords/`);
   show("pwdResult", r);
 }

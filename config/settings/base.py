@@ -202,11 +202,6 @@ CELERY_BEAT_SCHEDULE = {
         "task": "tasks.statistics_tasks.generate_statistics_task",
         "schedule": crontab(hour=0, minute=0),
     },
-    # 临时测试调度：每 30 秒执行一次统计任务（验证 beat 自动投递，测试后可删除）
-    "test-every-30-seconds": {
-        "task": "tasks.statistics_tasks.generate_statistics_task",
-        "schedule": timedelta(seconds=30),
-    },
 }
 
 # ============================================================
