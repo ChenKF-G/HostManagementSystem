@@ -1,0 +1,564 @@
+Host Manager（主机管理系统）设计文档
+第一章 项目介绍
+项目背景
+技术栈
+Python 3.12
+
+Django 5.x
+
+Django REST Framework
+
+MySQL
+
+Redis
+
+Celery
+
+Celery Beat
+
+Paramiko（SSH修改密码）
+
+cryptography（密码加密）
+
+drf-spectacular（Swagger）
+
+Docker（可选）
+第二章 功能需求（对应笔试要求）
+
+逐条拆解：
+
+主机管理
+城市管理
+机房管理
+CRUD
+Ping检测
+Root密码管理
+定时修改密码
+主机统计
+请求耗时统计
+
+再增加
+
+扩展功能
+
+例如
+
+JWT登录
+Swagger
+日志
+分页
+搜索
+排序
+操作日志
+参数校验
+第三章 数据库设计
+
+包括
+
+ER图
+
+每张表
+
+字段
+
+索引
+
+唯一约束
+
+例如
+
+City
+
+IDC
+
+Host
+
+HostPasswordHistory
+
+HostStatistics
+
+User
+
+OperationLog
+
+每个字段为什么存在
+
+为什么不用覆盖密码
+
+为什么需要历史表
+
+为什么需要统计表
+
+全部说明。
+
+第四章 项目目录
+
+例如
+
+host_manager
+│
+├── config
+│
+├── apps
+│   ├── users
+│   ├── city
+│   ├── idc
+│   ├── host
+│   ├── statistics
+│   └── common
+│
+├── services
+│
+├── tasks
+│
+├── utils
+│
+├── middleware
+│
+├── logs
+│
+├── requirements.txt
+│
+└── README.md
+
+然后解释每层职责。
+
+第五章 API设计
+
+例如
+
+POST /login
+
+GET /hosts
+
+POST /hosts
+
+PUT /hosts/{id}
+
+DELETE /hosts/{id}
+
+POST /hosts/{id}/ping
+
+GET /statistics
+
+说明
+
+请求参数
+
+返回参数
+
+HTTP状态码
+
+错误码
+
+第六章 Serializer设计（这一章必须有）
+
+这一章就是你刚刚想到的。
+
+例如：
+
+HostSerializer
+
+HostCreateSerializer
+
+HostUpdateSerializer
+
+HostListSerializer
+
+HostDetailSerializer
+
+为什么分开？
+
+因为：
+
+创建
+
+更新
+
+查询
+
+返回字段
+
+一般都不一样。
+
+例如
+
+创建：
+
+hostname
+
+ip
+
+password
+
+查询：
+
+id
+
+hostname
+
+city
+
+idc
+
+status
+
+create_time
+
+密码不能返回。
+
+第七章 View设计
+
+推荐
+
+APIView
+
+或者
+
+ModelViewSet
+
+例如
+
+HostViewSet
+
+CityViewSet
+
+IDCViewSet
+
+然后说明
+
+为什么使用 ViewSet。
+
+第八章 Service层（重点）
+
+很多人不会写。
+
+例如
+
+views
+
+↓
+
+service
+
+↓
+
+models
+
+不要
+
+views
+
+↓
+
+models
+
+例如
+
+HostService
+
+PasswordService
+
+PingService
+
+StatisticsService
+
+业务逻辑全部放Service。
+
+第九章 Celery设计
+
+包括
+
+Redis
+
+Celery
+
+Beat
+
+Worker
+
+流程图
+
+例如
+
+Beat
+
+↓
+
+发送任务
+
+↓
+
+Worker
+
+↓
+
+修改密码
+
+↓
+
+写数据库
+
+另外
+
+统计任务
+
+也一样。
+
+第十章 Middleware设计
+
+例如
+
+RequestTimeMiddleware
+
+记录
+
+URL
+
+Method
+
+Status
+
+IP
+
+耗时
+
+用户
+第十一章 密码设计
+
+这一章最好。
+
+说明
+
+为什么不能MD5
+
+为什么不能Base64
+
+为什么使用AES/Fernet
+
+为什么需要密钥
+
+为什么密钥放环境变量
+
+第十二章 Ping设计
+
+介绍
+
+subprocess
+
+Paramiko
+
+timeout
+
+异常处理
+
+状态更新
+
+第十三章 JWT认证（推荐）
+
+虽然题目没要求。
+
+但是管理系统都有。
+
+介绍
+
+login
+
+↓
+
+JWT
+
+↓
+
+Authorization
+
+↓
+
+Permission
+
+↓
+
+APIView
+第十四章 返回格式（这一章必须做）
+
+也是你刚刚想到的。
+
+建议统一：
+
+{
+    "code": 200,
+    "message": "success",
+    "data": {}
+}
+
+失败：
+
+{
+    "code": 400,
+    "message": "IP地址非法",
+    "data": null
+}
+
+不要每个接口返回都不一样。
+
+可以封装
+
+Result
+
+例如
+
+Result.success(data)
+
+Result.fail(msg)
+第十五章 全局异常
+
+统一异常处理
+
+例如
+
+ValidationError
+
+404
+
+500
+
+PermissionDenied
+
+统一变成
+
+{
+    "code":400,
+    "message":"参数错误",
+    "data":null
+}
+第十六章 Serializer
+
+为什么需要Serializer？
+
+很多人理解错。
+
+它不仅仅是
+
+JSON
+
+实际上有四个功能：
+
+✅ 参数校验
+
+IP是否合法
+
+端口是否合法
+
+不能为空
+
+✅ ORM对象
+
+↓
+
+Serializer
+
+↓
+
+JSON
+
+JSON
+
+↓
+
+Serializer
+
+↓
+
+ORM
+
+还能
+
+自动生成Swagger。
+
+第十七章 日志
+
+logging
+
+错误日志
+
+接口日志
+
+Celery日志
+
+建议分开。
+
+第十八章 README
+
+包括
+
+安装
+
+启动
+
+数据库
+
+Redis
+
+Celery
+
+Beat
+
+接口说明
+
+Swagger
+
+Docker
+
+另外，我建议再增加几个企业级模块
+
+如果时间允许，我会加：
+
+① settings 分环境配置
+settings/
+
+    base.py
+
+    dev.py
+
+    prod.py
+② utils
+encrypt.py
+
+jwt.py
+
+response.py
+
+pagination.py
+
+permissions.py
+
+validators.py
+③ constants
+
+统一管理
+
+SUCCESS
+
+FAILED
+
+ONLINE
+
+OFFLINE
+
+不要写魔法值。
+
+④ manager
+
+例如
+
+HostManager
+
+封装复杂查询。
+
+⑤ signals（可选）
+
+例如
+
+Host删除
+
+自动删除密码记录。
