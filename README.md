@@ -40,8 +40,7 @@
 - [八、环境要求与安装](#八环境要求与安装)
 - [九、启动方式](#九启动方式)
 - [十、测试与验证](#十测试与验证)
-- [十一、Docker 部署](#十一docker-部署)
-- [十二、常见问题](#十二常见问题)
+- [十一、常见问题](#十一常见问题)
 
 ---
 
@@ -149,7 +148,7 @@ HostManagementSystem/
 │   ├── status.py            # ONLINE/OFFLINE
 │   └── response_code.py     # 业务错误码
 ├── static/test/             # 前端测试台页面
-├── docker/                  # Dockerfile + docker-compose
+├── images/                  # README 运行截图
 ├── logs/                    # 日志输出目录
 ├── manage.py
 ├── requirements.txt
@@ -511,18 +510,7 @@ celery -A tasks beat -l info                 # 终端2
 
 ---
 
-## 十一、Docker 部署
-
-`docker/` 目录提供 Dockerfile 与 docker-compose.yml，一键启动 **Django + MySQL + Redis + Celery Worker + Celery Beat**：
-
-```bash
-cp .env.example .env    # 配置环境变量
-docker compose -f docker/docker-compose.yml up -d
-```
-
----
-
-## 十二、常见问题
+## 十一、常见问题
 
 1. **登录提示"用户名或密码错误"**：确认密码正确，可 `python manage.py changepassword admin` 重置。
 2. **新增主机前**：需先创建城市与机房，并记录其 id 填入主机。
