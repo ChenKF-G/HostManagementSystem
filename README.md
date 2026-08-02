@@ -1,7 +1,6 @@
 # Host Manager（主机管理系统）
 
 - 技术栈：Python 3.11 + Django 5.0 + Django REST Framework + MySQL 8 + Redis 7 + Celery 5
-- 文档地址：[开发要求文档.md](./开发要求文档.md) | [前端测试页面设计文档.md](./前端测试页面设计文档.md)
 
 ---
 
@@ -47,7 +46,7 @@
 | E5 | 操作日志 | 记录用户关键写操作（create/update/delete） | `apps/common/models.py` + `services/operation_log_service.py` |
 | E6 | 参数校验 | Serializer 层统一校验（IP、端口等） | `utils/validators.py` |
 | E7 | 统一返回格式 | `{code, message, data}` 统一封装 | `utils/response.py` |
-| E8 | 全局异常处理 | 统一兜底异常，避免堆栈泄露 | `utils/exceptions.py` |
+| E8 | 全局异常处理 | 统一异常，避免堆栈泄露 | `utils/exceptions.py` |
 | E9 | 分环境配置 | `base / dev / prod` 配置分离 | `config/settings/` |
 
 ---
@@ -77,7 +76,7 @@
      └────────────┘      └────────────┘
 ```
 
-- **View 层**：只负责参数接收 → 调用 Service → 封装返回，不承载业务逻辑；
+- **View 层**：只负责参数接收 → 调用 Service → 封装返回；
 - **Service 层**：业务规则核心（密码轮换、Ping 探测、统计、主机操作），可被 View 与 Celery Task 复用；
 - **Model 层**：数据持久化与约束；
 - **禁止出现 `View → Model` 的绕过写法**。
