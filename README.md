@@ -2,7 +2,7 @@
 
 - 技术栈：Python 3.11 + Django 5.0 + Django REST Framework + MySQL 8 + Redis 7 + Celery 5
 
-> 📸 **项目运行截图**（将截图放入 `images/` 目录后，替换文件后缀即可显示）：
+> 📸 **项目运行截图**：
 
 ![项目运行总览](./images/screenshot-run-server.png)
 
@@ -529,5 +529,3 @@ docker compose -f docker/docker-compose.yml up -d
 6. **Ping 接口 404**：正确 URL 是 `POST /api/hosts/{id}/ping/`，中间必须有主机 id，且方法为 POST。
 
 ---
-
-> 更多设计细节见 [开发要求文档.md](./开发要求文档.md)。
