@@ -1,0 +1,5 @@
+# 日志文件目录
+# app.log     应用常规运行日志
+# error.log   错误与异常日志
+# celery.log  Celery 任务日志
+# 由 Django LOGGING 配置自动写入，目录自动创建。

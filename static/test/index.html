@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Host Manager 测试台</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: "Microsoft YaHei", sans-serif; background: #f5f7fa; color: #333; }
+  .header { background: #2c3e50; color: #fff; padding: 16px 24px; display: flex; justify-content: space-between; align-items: center; }
+  .header h1 { font-size: 20px; }
+  .nav { background: #34495e; padding: 8px 24px; }
+  .nav a { color: #bdc3c7; text-decoration: none; margin-right: 16px; padding: 6px 10px; border-radius: 4px; display: inline-block; }
+  .nav a:hover, .nav a.active { color: #fff; background: #2c3e50; }
+  .container { max-width: 1100px; margin: 20px auto; padding: 0 16px; }
+  .module { background: #fff; border-radius: 8px; padding: 20px; margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,.1); }
+  .module h2 { font-size: 18px; border-bottom: 2px solid #3498db; padding-bottom: 8px; margin-bottom: 16px; }
+  .form-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 12px; }
+  input, select { padding: 6px 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px; }
+  input { width: 160px; }
+  button { padding: 6px 14px; border: none; border-radius: 4px; background: #3498db; color: #fff; cursor: pointer; font-size: 14px; }
+  button:hover { opacity: .85; }
+  button.danger { background: #e74c3c; }
+  button.success { background: #27ae60; }
+  .result { background: #f8f9fa; border: 1px solid #eee; border-radius: 4px; padding: 12px; margin-top: 8px; max-height: 300px; overflow: auto; font-family: monospace; font-size: 12px; white-space: pre-wrap; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th, td { border: 1px solid #eee; padding: 6px 8px; text-align: left; }
+  th { background: #f0f4f8; }
+  .status-bar { font-size: 14px; }
+</style>
+</head>
+<body>
+<div class="header">
+  <h1>Host Manager 测试台</h1>
+  <div class="status-bar">用户: <span id="currentUser">未登录</span> <button class="danger" onclick="logout()">退出</button></div>
+</div>
+<div class="nav">
+  <a href="#login" class="active">登录</a>
+  <a href="#city">城市</a>
+  <a href="#idc">机房</a>
+  <a href="#host">主机</a>
+  <a href="#ping">Ping</a>
+  <a href="#password">密码历史</a>
+  <a href="#statistics">统计</a>
+  <a href="#requestlog">请求耗时</a>
+</div>
+
+<div class="container">
+
+  <!-- 登录模块 -->
+  <div class="module" id="login">
+    <h2>登录</h2>
+    <div class="form-row">
+      <input id="loginUser" placeholder="用户名">
+      <input id="loginPwd" type="password" placeholder="密码">
+      <button onclick="login()">登录</button>
+    </div>
+    <div id="loginResult" class="result"></div>
+  </div>
+
+  <!-- 城市模块 -->
+  <div class="module" id="city">
+    <h2>城市管理</h2>
+    <div class="form-row">
+      <button class="success" onclick="cityList()">查询列表</button>
+      <input id="citySearch" placeholder="搜索关键字">
+      <button onclick="cityList(1, document.getElementById('citySearch').value)">按条件查询</button>
+    </div>
+    <div class="form-row">
+      <input id="cityName" placeholder="name">
+      <input id="cityCode" placeholder="code">
+      <input id="cityRemark" placeholder="remark">
+      <button class="success" onclick="cityCreate()">新增</button>
+    </div>
+    <div class="form-row">
+      <input id="cityId" placeholder="id">
+      <button onclick="cityDetail()">详情</button>
+      <button onclick="cityUpdate()">更新</button>
+      <button class="danger" onclick="cityDelete()">删除</button>
+    </div>
+    <div id="cityResult" class="result"></div>
+  </div>
+
+  <!-- 机房模块 -->
+  <div class="module" id="idc">
+    <h2>机房管理</h2>
+    <div class="form-row">
+      <button class="success" onclick="idcList()">查询列表</button>
+    </div>
+    <div class="form-row">
+      <input id="idcCity" placeholder="city_id">
+      <input id="idcName" placeholder="name">
+      <input id="idcCode" placeholder="code">
+      <input id="idcAddress" placeholder="address">
+      <button class="success" onclick="idcCreate()">新增</button>
+    </div>
+    <div class="form-row">
+      <input id="idcId" placeholder="id">
+      <button onclick="idcDetail()">详情</button>
+      <button onclick="idcUpdate()">更新</button>
+      <button class="danger" onclick="idcDelete()">删除</button>
+    </div>
+    <div id="idcResult" class="result"></div>
+  </div>
+
+  <!-- 主机模块 -->
+  <div class="module" id="host">
+    <h2>主机管理</h2>
+    <div class="form-row">
+      <button class="success" onclick="hostList()">查询列表</button>
+    </div>
+    <div class="form-row">
+      <input id="hostHostname" placeholder="hostname">
+      <input id="hostIp" placeholder="ip">
+      <input id="hostPort" placeholder="port(22)">
+      <input id="hostIdc" placeholder="idc_id">
+      <input id="hostOs" placeholder="os_type">
+      <input id="hostPassword" placeholder="root密码">
+      <button class="success" onclick="hostCreate()">新增</button>
+    </div>
+    <div class="form-row">
+      <input id="hostId" placeholder="id">
+      <button onclick="hostDetail()">详情</button>
+      <button onclick="hostUpdate()">更新</button>
+      <button class="danger" onclick="hostDelete()">删除</button>
+    </div>
+    <div id="hostResult" class="result"></div>
+  </div>
+
+  <!-- Ping 模块 -->
+  <div class="module" id="ping">
+    <h2>Ping 探测</h2>
+    <div class="form-row">
+      <input id="pingId" placeholder="主机id">
+      <button class="success" onclick="hostPing()">探测</button>
+    </div>
+    <div id="pingResult" class="result"></div>
+  </div>
+
+  <!-- 密码历史模块 -->
+  <div class="module" id="password">
+    <h2>密码历史（脱敏）</h2>
+    <div class="form-row">
+      <input id="pwdId" placeholder="主机id">
+      <button onclick="hostPasswords()">查看密码历史</button>
+    </div>
+    <div id="pwdResult" class="result"></div>
+  </div>
+
+  <!-- 统计模块 -->
+  <div class="module" id="statistics">
+    <h2>主机统计</h2>
+    <div class="form-row">
+      <button class="success" onclick="statList()">统计列表</button>
+      <button onclick="statRun()">手动触发统计</button>
+    </div>
+    <div id="statResult" class="result"></div>
+  </div>
+
+  <!-- 请求耗时模块 -->
+  <div class="module" id="requestlog">
+    <h2>请求耗时记录</h2>
+    <div class="form-row">
+      <button class="success" onclick="reqLogList()">查询</button>
+      <input id="reqMethod" placeholder="method(GET)">
+      <input id="reqPath" placeholder="path关键字">
+      <input id="reqMinCost" placeholder="最小耗时(ms)">
+    </div>
+    <div id="reqResult" class="result"></div>
+  </div>
+
+</div>
+
+<script>
+const BASE = "/api";
+
+// ---------- 通用请求封装 ----------
+async function api(method, url, body = null) {
+  const token = localStorage.getItem("access_token");
+  const headers = { "Content-Type": "application/json" };
+  if (token) headers.Authorization = `Bearer ${token}`;
+  const res = await fetch(url, { method, headers, body: body ? JSON.stringify(body) : null });
+  const data = await res.json();
+  return { status: res.status, data };
+}
+
+function show(el, data) {
+  document.getElementById(el).textContent = JSON.stringify(data, null, 2);
+}
+
+function getToken() {
+  return localStorage.getItem("access_token");
+}
+
+// ---------- 登录 ----------
+async function login() {
+  const r = await api("POST", `${BASE}/auth/login`, {
+    username: document.getElementById("loginUser").value,
+    password: document.getElementById("loginPwd").value,
+  });
+  if (r.data && r.data.data && r.data.data.access) {
+    localStorage.setItem("access_token", r.data.data.access);
+    document.getElementById("currentUser").textContent = r.data.data.user?.username || "已登录";
+  }
+  show("loginResult", r);
+}
+
+function logout() {
+  localStorage.removeItem("access_token");
+  document.getElementById("currentUser").textContent = "未登录";
+}
+
+// ---------- 城市 ----------
+async function cityList(page = 1, search = "") {
+  let url = `${BASE}/cities/?page=${page}`;
+  if (search) url += `&search=${encodeURIComponent(search)}`;
+  const r = await api("GET", url);
+  show("cityResult", r);
+}
+async function cityCreate() {
+  const r = await api("POST", `${BASE}/cities/`, {
+    name: document.getElementById("cityName").value,
+    code: document.getElementById("cityCode").value,
+    remark: document.getElementById("cityRemark").value,
+  });
+  show("cityResult", r);
+}
+async function cityDetail() {
+  const id = document.getElementById("cityId").value;
+  const r = await api("GET", `${BASE}/cities/${id}/`);
+  show("cityResult", r);
+}
+async function cityUpdate() {
+  const id = document.getElementById("cityId").value;
+  const r = await api("PUT", `${BASE}/cities/${id}/`, {
+    name: document.getElementById("cityName").value,
+    code: document.getElementById("cityCode").value,
+    remark: document.getElementById("cityRemark").value,
+  });
+  show("cityResult", r);
+}
+async function cityDelete() {
+  const id = document.getElementById("cityId").value;
+  const r = await api("DELETE", `${BASE}/cities/${id}/`);
+  show("cityResult", r);
+}
+
+// ---------- 机房 ----------
+async function idcList() {
+  const r = await api("GET", `${BASE}/idcs/`);
+  show("idcResult", r);
+}
+async function idcCreate() {
+  const r = await api("POST", `${BASE}/idcs/`, {
+    city: document.getElementById("idcCity").value,
+    name: document.getElementById("idcName").value,
+    code: document.getElementById("idcCode").value,
+    address: document.getElementById("idcAddress").value,
+  });
+  show("idcResult", r);
+}
+async function idcDetail() {
+  const id = document.getElementById("idcId").value;
+  const r = await api("GET", `${BASE}/idcs/${id}/`);
+  show("idcResult", r);
+}
+async function idcUpdate() {
+  const id = document.getElementById("idcId").value;
+  const r = await api("PUT", `${BASE}/idcs/${id}/`, {
+    city: document.getElementById("idcCity").value,
+    name: document.getElementById("idcName").value,
+    code: document.getElementById("idcCode").value,
+    address: document.getElementById("idcAddress").value,
+  });
+  show("idcResult", r);
+}
+async function idcDelete() {
+  const id = document.getElementById("idcId").value;
+  const r = await api("DELETE", `${BASE}/idcs/${id}/`);
+  show("idcResult", r);
+}
+
+// ---------- 主机 ----------
+async function hostList() {
+  const r = await api("GET", `${BASE}/hosts/`);
+  show("hostResult", r);
+}
+async function hostCreate() {
+  const r = await api("POST", `${BASE}/hosts/`, {
+    hostname: document.getElementById("hostHostname").value,
+    ip: document.getElementById("hostIp").value,
+    port: document.getElementById("hostPort").value || 22,
+    idc: document.getElementById("hostIdc").value,
+    os_type: document.getElementById("hostOs").value,
+    password: document.getElementById("hostPassword").value,
+  });
+  show("hostResult", r);
+}
+async function hostDetail() {
+  const id = document.getElementById("hostId").value;
+  const r = await api("GET", `${BASE}/hosts/${id}/`);
+  show("hostResult", r);
+}
+async function hostUpdate() {
+  const id = document.getElementById("hostId").value;
+  const r = await api("PUT", `${BASE}/hosts/${id}/`, {
+    hostname: document.getElementById("hostHostname").value,
+    idc: document.getElementById("hostIdc").value,
+    os_type: document.getElementById("hostOs").value,
+  });
+  show("hostResult", r);
+}
+async function hostDelete() {
+  const id = document.getElementById("hostId").value;
+  const r = await api("DELETE", `${BASE}/hosts/${id}/`);
+  show("hostResult", r);
+}
+
+// ---------- Ping ----------
+async function hostPing() {
+  const id = document.getElementById("pingId").value;
+  const r = await api("POST", `${BASE}/hosts/${id}/ping/`);
+  show("pingResult", r);
+}
+
+// ---------- 密码历史 ----------
+async function hostPasswords() {
+  const id = document.getElementById("pwdId").value;
+  const r = await api("GET", `${BASE}/hosts/${id}/passwords/`);
+  show("pwdResult", r);
+}
+
+// ---------- 统计 ----------
+async function statList() {
+  const r = await api("GET", `${BASE}/statistics/`);
+  show("statResult", r);
+}
+async function statRun() {
+  const r = await api("POST", `${BASE}/statistics/run/`);
+  show("statResult", r);
+}
+
+// ---------- 请求耗时 ----------
+async function reqLogList() {
+  let url = `${BASE}/request-logs/`;
+  const params = [];
+  const method = document.getElementById("reqMethod").value;
+  const path = document.getElementById("reqPath").value;
+  const minCost = document.getElementById("reqMinCost").value;
+  if (method) params.push(`method=${method}`);
+  if (path) params.push(`path=${encodeURIComponent(path)}`);
+  if (minCost) params.push(`min_cost_ms=${minCost}`);
+  if (params.length) url += `?${params.join("&")}`;
+  const r = await api("GET", url);
+  show("reqResult", r);
+}
+</script>
+</body>
+</html>
