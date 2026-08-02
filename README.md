@@ -2,6 +2,30 @@
 
 - 技术栈：Python 3.11 + Django 5.0 + Django REST Framework + MySQL 8 + Redis 7 + Celery 5
 
+> 📸 **项目运行截图**（将截图放入 `images/` 目录后，替换文件后缀即可显示）：
+
+![项目运行总览](./images/screenshot-run-server.png)
+
+---
+
+## 运行界面预览
+
+### 前端测试台页面（`/test/`）
+
+![前端测试页面](./images/screenshot-index.png)
+
+
+### Swagger API 文档（`/api/docs/`）
+
+![Swagger API 文档](./images/screenshot-swagger.png)
+
+### 日志输出(主机采用尝试连接到192.168.1.10:22，触发回滚，保留旧密码)
+
+![Celery 定时任务日志输出](./images/screenshot-log-celery-1.png)
+![Celery 定时任务日志文件](./images/screenshot-log-celery-2.png)
+
+![请求耗时日志](./images/screenshot-log-request.png)
+
 ---
 
 ## 目录
@@ -378,6 +402,16 @@ Swagger 文档（需启动服务）：
 
 **错误码**：`200`成功 / `40000`参数校验失败 / `40100`未登录 / `40101`Token过期 / `40300`无权限 / `40400`资源不存在 / `40900`唯一约束冲突 / `50000`服务器内部错误。
 
+**各功能模块界面截图**：
+
+![Ping 探测结果](./images/screenshot-ping.png)
+
+![密码历史界面](./images/screenshot-password.png)
+
+![主机统计界面](./images/screenshot-statistics.png)
+
+![请求耗时记录界面](./images/screenshot-requestlog.png)
+
 ---
 
 ## 八、环境要求与安装
@@ -428,14 +462,22 @@ python manage.py createsuperuser
 # 1. Django Web 服务
 python manage.py runserver 0.0.0.0:8000
 
-# 2. Celery Worker（消费任务）
-celery -A tasks worker -l info
+# 2. Celery Worker（消费任务，Windows 下需加 --pool=solo）
+celery -A tasks worker -l info --pool=solo
 
 # 3. Celery Beat（定时任务调度）
 celery -A tasks beat -l info
 ```
 
 > 生产环境：`gunicorn config.wsgi:application --bind 0.0.0.0:8000`
+
+**启动运行截图**：
+
+![Django 服务启动](./images/screenshot-run-server.png)
+
+![Celery Worker 运行](./images/screenshot-celery-worker.png)
+
+![Celery Beat 定时调度](./images/screenshot-celery-beat.png)
 
 ---
 
@@ -458,8 +500,8 @@ python manage.py shell -c "from tasks.password_tasks import rotate_password_task
 启动 Redis 后：
 
 ```bash
-celery -A tasks worker -l info     # 终端1
-celery -A tasks beat -l info       # 终端2
+celery -A tasks worker -l info --pool=solo   # 终端1（Windows 加 --pool=solo）
+celery -A tasks beat -l info                 # 终端2
 ```
 
 即可验证每 8 小时密码轮换、每天 00:00 统计的自动触发。
